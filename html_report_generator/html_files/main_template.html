@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Automation Test Portal</title>
+<style>
+body {{ font-family: Segoe UI, sans-serif; margin: 0; background: #f8fbff; }}
+#headerBar {{
+    background-color: #33343B;
+    color: #fff;
+    font-size: 1.4em;
+    font-weight: bold;
+    padding: 12px 20px;
+    box-shadow: 0 2px 10px #b7cce7;
+    user-select: none;
+    font-family: Segoe UI, sans-serif
+}}
+#layout {{ display: flex; min-height: calc(100vh - 56px); }} /* subtract header height */
+#sidebar {{
+  width: 60px; background: #eeeeee; color:#fff; display:flex; flex-direction:column;
+  align-items:center; box-shadow:2px 0 16px #b7cce7; z-index:2; padding-top:16px;
+}}
+.sidenav-btn {{
+  width: 44px; height: 44px; background: none; border: none;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:12px; border-radius:8px; cursor:pointer; outline:none;
+  transition: background 0.15s, color 0.18s;
+  font-size: 1.6em;
+}}
+.sidenav-btn.selected, .sidenav-btn:hover {{ background: #e7f3ff; color: #3393e6; }}
+.main-content {{ flex:1; padding:0; }}
+#iconBar svg {{ width:27px; height:27px; display:block; }}
+@media (max-width:600px) {{
+  #sidebar {{ width:40px; }}
+  .sidenav-btn {{ width:32px; height:32px; }}
+  #iconBar svg {{ width:20px; height:20px; }}
+}}
+</style>
+</head>
+<body>
+<div id="headerBar">Automation Report</div>
+<div id="layout">
+  <div id="sidebar">
+    <div id="iconBar">
+      <button class="sidenav-btn selected" id="dashboardBtn" onclick="showSection('dashboard')" title="Dashboard">
+        <!-- Dashboard icon SVG -->
+        <svg fill="currentColor" viewBox="0 0 20 20"><rect width="7" height="7" x="2" y="2" rx="2"/><rect width="7" height="7" x="11" y="2" rx="2"/><rect width="7" height="7" x="2" y="11" rx="2"/><rect width="7" height="7" x="11" y="11" rx="2"/></svg>
+      </button>
+      <button class="sidenav-btn" id="modulesBtn" onclick="showSection('modules')" title="Modules">
+        <!-- Modules icon SVG -->
+        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 4 2 8l8 4 8-4-8-4zm8 6.18-7.55 3.78a.99.99 0 0 1-.9 0L2 10.18V12l8 4 8-4v-1.82z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="main-content">
+    <div id="dashboardSection" style="display:block;">
+      {dashboard_html}
+    </div>
+    <div id="modulesSection" style="display:none;">
+      {report_html}
+    </div>
+  </div>
+</div>
+<script>
+function showSection(section) {{
+  document.getElementById('dashboardSection').style.display = (section == 'dashboard') ? 'block' : 'none';
+  document.getElementById('modulesSection').style.display = (section == 'modules') ? 'block' : 'none';
+  document.getElementById('dashboardBtn').classList.toggle('selected', section == 'dashboard');
+  document.getElementById('modulesBtn').classList.toggle('selected', section == 'modules');
+}}
+</script>
+</body>
+</html>

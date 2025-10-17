@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Test Report Details</title>
+  <style>
+    body {{
+      margin: 0;
+      font-family: Segoe UI, sans-serif;
+      background: #f8f9fa;
+      color: #222a36;
+    }}
+    .test-btn-text.selected {{
+      font-weight: 700;
+      color: #ef7720;
+    }}
+    #modules-panel {{ width: 410; flex-shrink: 0; padding: 18px 0 18px 8px; background: #eeeeee; box-shadow: 1px 0 7px #e2e7f7; }}
+    #main-content {{ flex: 1 1 auto; padding: 24px 24px 80px 24px; background: #fafbff; }}
+    .module {{
+      font-weight: 600; font-size: 0.90em;
+      padding: 11px 14px 11px 20px;
+      cursor: pointer; color: #3a3381;
+      border-radius: 7px;
+      transition: background 0.12s;
+      display: flex; align-items: center; gap: 8px;
+    }}
+    .module.open {{ background: #ede6fa; }}
+    .test-row {{ position: relative;}}
+    .test-btn-text {{
+      font-weight: normal;
+      cursor: pointer;
+      padding: 8px 0 6px 14px;
+      color: #222a36;
+      font-size: 0.95em;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }}
+    .test-list {{ margin-bottom: 8px; }}
+    .status-badge {{
+      font-size: 0.87em;
+      padding: 2px 8px;
+      border-radius: 7px;
+      min-width: 36px;
+      text-align: center;
+      font-weight: bold;
+      margin-left: 12px;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }}
+    .status-badge.pass {{ background: #98db91; color: #fff;}}
+    .status-badge.fail {{ background: #e18989; color: #fff;}}
+    .status-badge.skip {{ background: #ffe3b0; color: #a27800;}}
+    .test-separator {{ margin: 2px 10px 3px 10px; border: 0; border-bottom: 1px solid #DCDCDC;}}
+    .filter-block {{ float: right; margin-right: 25px;}}
+    .filter-select {{
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 4px 10px;
+      color: #7e5fcf;
+      background: #f8f9fa;
+      font-weight: 600;
+      font-size: 0.96em;
+    }}
+    #test-detail-panel {{background:#fff; border:1px solid #e3e3e7; border-radius:8px; padding: 28px 34px; min-height:200px;}}
+    .test-detail-title {{ <!--font-size:1.2em; font-weight:600; color:#425;--> font-size:1.65em; font-weight:500; color:#ea6321;}}
+    .test-steps-table {{ width:100%; border-collapse:collapse; margin-top:19px;}}
+    .test-steps-table th, .test-steps-table td {{
+      border-bottom:1px solid #DCDCDC;
+      padding:9px 7px; font-size:0.97em;
+    }}
+    .test-steps-table th {{ background:#f5f6fb; }}
+  </style>
+</head>
+<body>
+  <div style="display:flex; height:100vh;">
+
+    <!-- Modules side panel -->
+    <div id="modules-panel">
+
+      <div style="font-size:2em; font-weight:700; color:#222a36; padding:24px 0 10px 20px;">Modules</div>
+      <div style="margin:18px 13px 6px 18px; display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <a href="javascript:void(0)" onclick="expandAllModules()" style="color:#7e5fcf; font-weight:600; text-decoration:underline; margin-right:22px;">Expand All +</a>
+          <a href="javascript:void(0)" onclick="collapseAllModules()" style="color:#7e5fcf; font-weight:600; text-decoration:underline;">Collapse All - </a>
+        </div>
+        <div class="filter-block">
+          <select class="filter-select" onchange="filterTestsByStatus(this.value)">
+            <option value="all">Show All</option>
+            <option value="pass">Pass</option>
+            <option value="fail">Fail</option>
+            <option value="skip">skip</option>
+          </select>
+        </div>
+      </div>
+
+      <input id="moduleSearch" type="text" placeholder="Search modules..." style="width:90%;margin: 0 0 12px 15px; padding:6px; border-radius:5px; border:1px solid #d1d5db; font-size:1em;">
+      <div id="modList">
+        {module_entries}
+      </div>
+    </div>
+
+    <!-- Main test case details panel -->
+    <div id="main-content">
+      <div id="test-detail-panel">
+        <div class="test-detail-title" id="detailTitle">Select a test to view details</div>
+        <div id="detailDesc"></div>
+        <table class="test-steps-table" style="display:none;" id="stepsTable">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Timestamp</th>
+              <th>Message</th>
+              <th>Screenshot</th>
+            </tr>
+          </thead>
+          <tbody id="stepsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <script>
+    let testData = {test_data_json};
+
+    function toggleModule(moduleIdx) {{
+      const modDiv = document.getElementById('modbtn'+moduleIdx);
+      const testList = document.getElementById('testlist'+moduleIdx);
+      if(testList.style.display === 'block') {{
+        testList.style.display = 'none';
+        modDiv.classList.remove('open');
+      }} else {{
+        testList.style.display = 'block';
+        modDiv.classList.add('open');
+      }}
+    }}
+    function expandAllModules() {{
+      document.querySelectorAll('.module').forEach((mod, i) => {{
+        mod.classList.add('open');
+        let testList = document.getElementById('testlist'+i);
+        if(testList) testList.style.display = 'block';
+      }});
+    }}
+    function collapseAllModules() {{
+      document.querySelectorAll('.module').forEach((mod, i) => {{
+        mod.classList.remove('open');
+        let testList = document.getElementById('testlist'+i);
+        if(testList) testList.style.display = 'none';
+      }});
+    }}
+    function filterTestsByStatus(filter) {{
+  const modules = document.querySelectorAll('.module');
+  const testLists = document.querySelectorAll('.test-list');
+
+  testLists.forEach((testList, i) => {{
+    let visibleTests = 0;
+    const testRows = testList.querySelectorAll('.test-row');
+
+    testRows.forEach(row => {{
+      let badge = row.querySelector('.status-badge');
+      let val = badge ? badge.textContent.toLowerCase() : "";
+      if (filter === "all" || filter === val) {{
+        row.style.display = "";
+        visibleTests++;
+      }} else {{
+        row.style.display = "none";
+      }}
+    }});
+
+    if (visibleTests > 0) {{
+      modules[i].style.display = "";
+      testList.style.display = "";
+      // Expand modules automatically for filtered view
+      if (filter !== "all") {{
+        expandModule(modules[i]); // new helper function
+      }} else {{
+        collapseModule(modules[i]);
+      }}
+    }} else {{
+      modules[i].style.display = "none";
+      testList.style.display = "none";
+    }}
+  }});
+
+  // Only collapse all when showing "all"
+  if (filter === "all") {{
+    collapseAllModules();
+  }}
+}}
+
+// Helper function to expand a specific module
+function expandModule(moduleElem) {{
+  const body = moduleElem.querySelector('.module-body');
+  if (body && body.classList.contains('collapsed')) {{
+    body.classList.remove('collapsed');
+    body.classList.add('expanded');
+  }}
+}}
+
+// Helper function to collapse a specific module
+function collapseModule(moduleElem) {{
+  const body = moduleElem.querySelector('.module-body');
+  if (body && body.classList.contains('expanded')) {{
+    body.classList.remove('expanded');
+    body.classList.add('collapsed');
+  }}
+}}
+
+window.onload = function() {{
+
+  const filterSelect = document.querySelector('.filter-select');
+  if (filterSelect) filterSelect.value = 'all';
+  collapseAllModules();
+}};
+
+
+   function showTest(modIdx, testIdx) {{
+ document.querySelectorAll('.test-btn-text').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('testbtn_'+modIdx+'_'+testIdx).classList.add('selected');
+  const test = testData[modIdx].tests[testIdx];
+
+  // Updated detail title and description styling
+  let html = `
+    <div style="font-size:1.65em; font-weight:500; color:#ea6321;">${{test.name || ''}}</div>
+    <div style="display:flex;align-items:center;font-size:1em;margin:8px 0;">
+      <span class="status-badge ${{test.status.toLowerCase()}}">${{test.status || ''}}</span>
+      <span style="color:#909090;">${{test.start_time || ''}} - Duration: ${{test.duration || '0:00:00'}}</span>
+      <span style="margin-left:15px;font-size:0.96em;color:#bbb;">#${{test.test_id || ""}}</span>
+    </div>
+    <div>
+  `;
+
+  (test.annotations || []).forEach(function(a) {{
+    html += `<span style="display:inline-block;background:#ede6fa; color:#7e5fcf; font-size:.93em;font-weight:500;padding:4px 13px;border-radius:4px;margin-right:7px;margin-bottom:4px;">${{a}}</span>`;
+  }});
+
+  html += `</div> <div style="color:#ea6321;margin:13px 0 7px 0;font-size:1.11em; font-weight:bold;">${{test.description || ''}}</div>
+  <hr style="margin:15px 0 22px 0; border: none; border-top:1.5px solid #8883;"/>`;
+
+  document.getElementById('detailTitle').innerHTML = html;
+
+  // Test steps table section
+  let stepsHtml = "";
+  for (const s of test.steps || []) {{
+    stepsHtml += `
+      <tr>
+        <td><span class="status-badge ${{s.status.toLowerCase()}}">${{s.status}}</span></td>
+        <td>${{s.timestamp}}</td>
+        <td>${{s.message}}</td>
+        <td>${{s.screenshot ? `<img src='${{s.screenshot}}' style='max-width:65px; border:1.5px solid #ede6fa; border-radius:5px;'>` : ''}}</td>
+      </tr>
+    `;
+  }}
+
+  document.getElementById('stepsBody').innerHTML = stepsHtml;
+  document.getElementById('stepsTable').style.display = (test.steps && test.steps.length) ? '' : 'none';
+}}
+
+  </script>
+</body>
+</html>

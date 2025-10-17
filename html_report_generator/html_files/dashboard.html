@@ -1,0 +1,116 @@
+<div id="dashboard" style="padding:24px 24px 0 24px; background:#f8f9fa; box-shadow:0 2px 22px #e2eeff;">
+    <div style="display:flex;flex-wrap:wrap;gap:18px;">
+
+        <!-- Overall Execution Time Tile -->
+        <div style="flex:1; background: white; border: 1px solid #ddd; padding:18px 18px 8px 18px; border-radius:9px;">
+            <span style="font-size:1.02em; font-weight:600; color:#455;">Overall Execution Time</span>
+            <div style="font-size:1.21em; margin-top:6px;">{duration}</div>
+        </div>
+
+        <!-- Started Tile -->
+        <div style="flex:1; background: white; border: 1px solid #ddd; padding:18px 18px 8px 18px; border-radius:9px;">
+            <span style="font-size:1.02em; font-weight:600; color:#455;">Started</span>
+            <div style="font-size:1.21em; margin-top:6px;">{overall_start}</div>
+        </div>
+
+        <!-- Ended Tile -->
+        <div style="flex:1; background: white; border: 1px solid #ddd; padding:18px 18px 8px 18px; border-radius:9px;">
+            <span style="font-size:1.02em; font-weight:600; color:#455;">Ended</span>
+            <div style="font-size:1.21em; margin-top:6px;">{overall_end}</div>
+        </div>
+
+        <!-- Tests Passed Tile -->
+        <div style="flex:1; background: white; border: 1px solid #ddd; padding:18px 18px 8px 18px; border-radius:9px;">
+            <span style="font-size:1.02em; font-weight:600; color:#455;">Tests Passed</span>
+            <div style="color:#21a361; font-size:2em; font-weight:700;">{pass_cnt}</div>
+        </div>
+
+        <!-- Tests Failed Tile -->
+        <div style="flex:1; background: white; border: 1px solid #ddd; padding:18px 18px 8px 18px; border-radius:9px;">
+            <span style="font-size:1.02em; font-weight:600; color:#455;">Tests Failed</span>
+            <div style="color:#c62828; font-size:2em; font-weight:700;">{fail_cnt}</div>
+        </div>
+
+        <!-- Tests skip Tile -->
+      <div style="flex:1;background: white; border: 1px solid #ddd; padding:18px 18px 8px 18px; border-radius:9px;">
+  <span style="font-size:1.02em; font-weight:600; color:#455;">Tests skip</span>
+  <div style="color:#f9a825; font-size:2em; font-weight:700;">{skip_cnt}</div>
+</div>
+
+    </div>
+
+    <div style="display:flex; gap:22px; margin-top:32px; align-items:flex-start;">
+
+        <!-- Tests Tile -->
+        <div style="flex:2; background: white; height:230px;  border: 1px solid #ddd; padding:18px 18px 16px 18px; border-radius:9px; box-shadow:0 0 8px rgba(117,117,117,0.05);">
+            <span style="font-weight:600; color:#444;">Tests</span>
+            <canvas id="donutChart" width="110" height="110" style="margin-bottom:2px;"></canvas>
+
+        </div>
+
+        <!-- Environment Tile -->
+        <div style="flex:1 1 30%; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 18px 28px; box-shadow: 0 0 8px rgba(117,117,117,0.05);">
+            <h3 style="font-weight:600; margin-bottom:10px; font-size:1.2em;">Environment</h3>
+            <table style="width:100%; border-collapse: collapse; border: 1px solid #ccc; font-size:0.95em; color:#333;">
+              <thead>
+    <tr style="background:#f5f6fb;">
+      <th style="padding: 6px; border: 1px solid #ccc; text-align:left;">Name</th>
+      <th style="padding: 6px; border: 1px solid #ccc; text-align:left;">Value</th>
+    </tr>
+  </thead>
+                <tbody>
+                    {environment_html}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div style="display:flex; gap:22px; margin-top:32px;">
+
+        <!-- Tags Tile -->
+        <div style="flex:2; background: white; border: 1px solid #ddd; padding:18px 18px 16px 18px; border-radius:9px; box-shadow:0 0 8px rgba(117,117,117,0.05);">
+            <span style="font-weight:600; color:#444;">Tags</span>
+            <table style="width:98%; margin-top:12px; border-collapse: collapse; border: 1px solid #ccc; font-size:0.93em; color:#555;">
+                <thead>
+                    <tr style="background:#f5f6fb; border-bottom:1px solid #ccc;">
+                        <th align="left" style="padding:8px;">NAME</th>
+                        <th style="padding:8px;">PASSED</th>
+                        <th style="padding:8px;">FAILED</th>
+                        <th style="padding:8px;">skip</th>
+                        <th style="padding:8px;">OTHERS</th>
+                        <th style="padding:8px;">PASSED %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tags_html}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<!-- Donut chart (Chart.js CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+window.addEventListener('load', function() {{
+    if (document.getElementById('donutChart')) {{
+        const ctx = document.getElementById('donutChart').getContext('2d');
+        new Chart(ctx, {{
+            type: 'doughnut',
+            data: {{
+                labels: ['Pass', 'Fail', 'skip'],
+                datasets: [{{
+                    data: [{pass_cnt}, {fail_cnt}, {skip_cnt}],
+                    backgroundColor: ['#43a047', '#c62828', '#f9a825']
+                }}]
+            }},
+            options: {{
+                cutout: '65%',
+                plugins: {{ legend: {{ display: true, position: 'right' }} }}
+            }}
+        }});
+    }}
+}});
+</script>
+
