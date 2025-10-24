@@ -14,27 +14,39 @@ def html_report():
     report.flush()
     print("Extent report generated.")
 
+def get_module_name_pytest_module(module):
+    # Fetch module_name if defined, fallback to module.__name__
+    return getattr(module, "module_name", module.__name__)
+
 
 @pytest.fixture(scope="function", autouse=True)
 def create_test(html_report, request):
-    # Fixture that creates a new test instance per pytest test function
     test_name = request.node.name
-
-    #module = request.module.__name__
     description = f"Test generated for {test_name}"
 
-    test_instance = html_report.create_test(test_name, description)
+    # Get module_name attribute from the test module if defined
+    module = request.module
+    module_val = get_module_name_pytest_module(module)
+
+    # If module_name is a list, join with commas or handle how you like
+    if isinstance(module_val, list):
+        module_val = ", ".join(module_val)
+
+    test_instance = html_report.create_test(
+        name=test_name,
+        module=module_val,
+        description=description
+    )
 
     yield test_instance
 
-    # Example: finalize test with pass or fail
-    # This can be expanded to log more details based on the actual pytest outcome
-    if request.node.rep_call.passed:
-        test_instance.set_status(LogStatus.PASS)
-    elif request.node.rep_call.failed:
-        test_instance.set_status(LogStatus.FAIL)
-    else:
-        test_instance.set_status(LogStatus.SKIP)
+    if hasattr(request.node, "rep_call"):
+        if request.node.rep_call.passed:
+            test_instance.set_status(LogStatus.PASS)
+        elif request.node.rep_call.failed:
+            test_instance.set_status(LogStatus.FAIL)
+        else:
+            test_instance.set_status(LogStatus.SKIP)
 
 
 import pytest
