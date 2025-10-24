@@ -212,6 +212,7 @@ class HTMLReports:
         with open(self.main_template_path, "r", encoding="utf-8") as mf:
             main_template = mf.read()
 
+        os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
         with open(self.file_path, "w", encoding="utf-8") as outf:
             outf.write(main_template.format(
                 dashboard_html=dashboard_html,
