@@ -12,6 +12,8 @@ class LogStatus(Enum):
 
 class TestStep:
     def __init__(self, status, message, screenshot_path=None, timestamp=None):
+        if isinstance(status, str):
+            status = LogStatus[status.upper()]
         self.status = status
         self.message = message
         self.timestamp = timestamp or datetime.datetime.now().strftime("%I:%M:%S %p")
